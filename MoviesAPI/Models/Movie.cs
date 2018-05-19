@@ -6,6 +6,8 @@ namespace MoviesAPI.Models
     {
         public int Id { get; set; }
         [Required]
-        public string Name { get; set; }
+        public string Title { get; set; }
+        public int YearOfRelease { get; set; }
+        public double RunningTime { get; set; }
     }
 }
