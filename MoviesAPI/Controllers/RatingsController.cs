@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using MoviesAPI.Models;
+using MoviesAPI.Models.DTO;
 
 namespace MoviesAPI.Controllers
 {
@@ -36,7 +37,7 @@ namespace MoviesAPI.Controllers
 
             return Ok(rating);
         }
-        
+
         // PUT: api/Ratings/5
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> PutRating(int id, Rating rating)
@@ -85,6 +86,53 @@ namespace MoviesAPI.Controllers
             await db.SaveChangesAsync();
 
             return CreatedAtRoute("DefaultApi", new { id = rating.Id }, rating);
+        }
+
+        [ResponseType(typeof(void))]
+        public async Task<IHttpActionResult> PostRating(RatingDTO ratingDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Check the existence of the rating
+
+            Rating rating = db.Ratings.SingleOrDefault(r => r.MovieId == ratingDTO.MovieId && r.UserId == ratingDTO.UserId);
+            if (rating != null)
+            {
+                db.Entry(rating).State = EntityState.Modified;
+                try
+                {
+                    await db.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!RatingExists(rating.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return StatusCode(HttpStatusCode.NoContent);
+            }
+
+            int maxId = db.Ratings.Max(r => r.Id);
+            rating = new Rating
+            {
+                Id = maxId + 1,
+                UserId = ratingDTO.UserId,
+                MovieId = ratingDTO.MovieId,
+                Score = ratingDTO.Score
+            };
+
+            db.Ratings.Add(rating);
+            await db.SaveChangesAsync();
+
+            return StatusCode(HttpStatusCode.NoContent);
         }
 
         // DELETE: api/Ratings/5

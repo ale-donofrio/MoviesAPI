@@ -1,16 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace MoviesAPI.Models
+﻿namespace MoviesAPI.Models.DTO
 {
-    public class Rating
+    public class RatingDTO
     {
-        public int Id { get; set; }
-        [Required]
         public short Score { get; set; }
         public int UserId { get; set; }
         public int MovieId { get; set; }
-        public Movie Movie { get; set; }
-        public User User { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -20,8 +14,7 @@ namespace MoviesAPI.Models
             {
                 Rating rating = obj as Rating;
                 if (rating != null)
-                    areEqual = rating.Id == Id &&
-                            rating.UserId == UserId &&
+                    areEqual = rating.UserId == UserId &&
                             rating.MovieId == MovieId;
             }
             return areEqual;
@@ -29,7 +22,7 @@ namespace MoviesAPI.Models
 
         public override int GetHashCode()
         {
-            return (Id.GetHashCode() + UserId.GetHashCode() + MovieId.GetHashCode()) / 3;
+            return (UserId.GetHashCode() + MovieId.GetHashCode()) / 2;
         }
     }
 }

@@ -251,6 +251,7 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\DTO\GenreDTO.cs" />
     <Compile Include="Models\DTO\MovieDTO.cs" />
+    <Compile Include="Models\DTO\RatingDTO.cs" />
     <Compile Include="Models\DTO\SummarizedMovieDTO.cs" />
     <Compile Include="Models\Genre.cs" />
     <Compile Include="Models\IdentityModels.cs" />
