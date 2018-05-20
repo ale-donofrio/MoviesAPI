@@ -24,6 +24,13 @@ namespace MoviesAPI.Controllers
             Genre
         }
 
+        private enum Result
+        {
+            BadRequest,
+            NoData,
+            Ok
+        }
+
         private MoviesAPIContext db = new MoviesAPIContext();
 
         // GET: api/Movies
@@ -53,6 +60,37 @@ namespace MoviesAPI.Controllers
             }
 
             return Ok(new MovieDTO(movie));
+        }
+
+        private IQueryable<Movie> GetMovieByFilter(IQueryable<Movie> movies, string filter, string value, out Result result)
+        {
+            result = Result.NoData;
+            if (filter.Equals(FilterCriteria.Title.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            {
+                movies = movies.Where(m => m.Title.ToLower().Contains(value.ToLower()));
+            }
+            else if (filter.Equals(FilterCriteria.YearOfRelease.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            {
+                int year;
+                if (int.TryParse(value, out year))
+                {
+                    movies = movies.Where(m => m.YearOfRelease == year);
+                }
+                else
+                {
+                    result = Result.BadRequest;
+                }
+            }
+            else if (filter.Equals(FilterCriteria.Genre.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            {
+                string[] genres = value.ToLower().Split(',');
+                movies = movies.SelectMany(m => m.Genres).Where(g => genres.Contains(g.Name)).SelectMany(g => g.Movies);
+            }
+            else
+            {
+                result = Result.BadRequest;
+            }
+            return movies;
         }
 
         [Route("{filter}/{value}")]
@@ -98,7 +136,59 @@ namespace MoviesAPI.Controllers
 
             return Ok(movieDTOList);
         }
-        
+
+        [Route("{filter1}/{value1}/{filter2}/{value2}")]
+        public IHttpActionResult GetMovie(string filter1, string value1, string filter2, string value2)
+        {
+            IQueryable<Movie> movies = null;
+            if (filter1.Equals(FilterCriteria.Title.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            {
+                movies = db.Movies.Include(m => m.Genres).Include(m => m.Ratings).Where(m => m.Title.ToLower().Contains(value1.ToLower()));
+            }
+            else if (filter1.Equals(FilterCriteria.YearOfRelease.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            {
+                int year;
+                if (int.TryParse(value1, out year))
+                {
+                    movies = db.Movies.Include(m => m.Genres).Include(m => m.Ratings).Where(m => m.YearOfRelease == year);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            else if (filter1.Equals(FilterCriteria.Genre.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            {
+                string[] genres = value1.ToLower().Split(',');
+                movies = db.Genres.Include(g => g.Movies).Where(g => genres.Contains(g.Name.ToLower())).SelectMany(g => g.Movies);
+            }
+            else
+            {
+                return BadRequest();
+            }
+
+            Result result;
+            movies = GetMovieByFilter(movies, filter2, value2, out result);
+
+            if (result == Result.BadRequest)
+                return BadRequest();
+            else if (movies.Count() == 0)
+                return NotFound();
+
+            var movieDTOList = movies.Select(m =>
+            new MovieDTO
+            {
+                Id = m.Id,
+                Title = m.Title,
+                YearOfRelease = m.YearOfRelease,
+                RunningTime = m.RunningTime,
+                AverageRating = m.Ratings.Average(r => r.Score),
+                Genres = m.Genres.Select(g => g.Name).ToList()
+            });
+
+            return Ok(movieDTOList);
+        }
+
         // PUT: api/Movies/5
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> PutMovie(int id, Movie movie)
