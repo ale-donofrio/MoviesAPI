@@ -127,14 +127,13 @@ namespace MoviesAPI.Controllers
             }
 
             var movieDTOList = movies.Select(m =>
-            new MovieDTO
+            new SummarizedMovieDTO
             {
                 Id = m.Id,
                 Title = m.Title,
                 YearOfRelease = m.YearOfRelease,
                 RunningTime = m.RunningTime,
-                AverageRating = m.Ratings.Average(r => r.Score),
-                Genres = m.Genres.Select(g => g.Name).ToList()
+                AverageRating = m.Ratings.Average(r => r.Score)
             });
 
             return Ok(movieDTOList);
@@ -180,14 +179,13 @@ namespace MoviesAPI.Controllers
                 return NotFound();
 
             var movieDTOList = movies.Select(m =>
-            new MovieDTO
+            new SummarizedMovieDTO
             {
                 Id = m.Id,
                 Title = m.Title,
                 YearOfRelease = m.YearOfRelease,
                 RunningTime = m.RunningTime,
-                AverageRating = m.Ratings.Average(r => r.Score),
-                Genres = m.Genres.Select(g => g.Name).ToList()
+                AverageRating = m.Ratings.Average(r => r.Score)
             });
 
             return Ok(movieDTOList);
@@ -244,8 +242,7 @@ namespace MoviesAPI.Controllers
                 Title = m.Title,
                 YearOfRelease = m.YearOfRelease,
                 RunningTime = m.RunningTime,
-                AverageRating = m.Ratings.Average(r => r.Score),
-                Genres = m.Genres.Select(g => g.Name).ToList()
+                AverageRating = m.Ratings.Average(r => r.Score)
             });
 
             return Ok(movieDTOList);
