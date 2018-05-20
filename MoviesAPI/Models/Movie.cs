@@ -9,6 +9,7 @@ namespace MoviesAPI.Models
         public Movie()
         {
             Genres = new HashSet<Genre>();
+            Ratings = new HashSet<Rating>();
         }
 
         public int Id { get; set; }
@@ -20,5 +21,6 @@ namespace MoviesAPI.Models
         /// </summary>
         public int RunningTime { get; set; }
         public virtual ICollection<Genre> Genres { get; set; }
+        public virtual ICollection<Rating> Ratings { get; set; }
     }
 }

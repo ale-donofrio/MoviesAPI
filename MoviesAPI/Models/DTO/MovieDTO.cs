@@ -9,6 +9,7 @@ namespace MoviesAPI.Models.DTO
         public int YearOfRelease { get; set; }
         public int RunningTime { get; set; }
         public string[] Genres { get; set; }
+        public double? AverageRating { get; set; }
 
         public MovieDTO() { }
 
