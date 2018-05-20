@@ -7,27 +7,25 @@ using System.Web.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MoviesAPI;
 using MoviesAPI.Controllers;
+using MoviesAPI.Models.DTO;
 
 namespace MoviesAPI.Tests.Controllers
 {
     [TestClass]
-    public class ValuesControllerTest
+    public class MoviesControllerTest
     {
-        //[TestMethod]
-        //public void Get()
-        //{
-        //    // Arrange
-        //    ValuesController controller = new ValuesController();
+        [TestMethod]
+        public void GetMovies()
+        {
+            // Arrange
+            MoviesController controller = new MoviesController();
 
-        //    // Act
-        //    IEnumerable<string> result = controller.Get();
+            // Act
+            IEnumerable<MovieDTO> result = controller.GetMovies();
 
-        //    // Assert
-        //    Assert.IsNotNull(result);
-        //    Assert.AreEqual(2, result.Count());
-        //    Assert.AreEqual("value1", result.ElementAt(0));
-        //    Assert.AreEqual("value2", result.ElementAt(1));
-        //}
+            // Assert
+            Assert.IsNotNull(result);
+        }
 
         //[TestMethod]
         //public void GetById()
