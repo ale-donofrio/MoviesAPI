@@ -13,6 +13,7 @@ using MoviesAPI.Models;
 
 namespace MoviesAPI.Controllers
 {
+    [RoutePrefix("api/ratings")]
     public class RatingsController : ApiController
     {
         private MoviesAPIContext db = new MoviesAPIContext();
@@ -35,7 +36,7 @@ namespace MoviesAPI.Controllers
 
             return Ok(rating);
         }
-
+        
         // PUT: api/Ratings/5
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> PutRating(int id, Rating rating)

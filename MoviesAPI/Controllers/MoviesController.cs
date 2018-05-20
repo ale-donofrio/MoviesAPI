@@ -234,7 +234,7 @@ namespace MoviesAPI.Controllers
 
             if (movies.Count() == 0)
                 return NotFound();
-            
+
             var movieDTOList = movies.Select(m =>
             new MovieDTO
             {
@@ -243,6 +243,49 @@ namespace MoviesAPI.Controllers
                 YearOfRelease = m.YearOfRelease,
                 RunningTime = m.RunningTime,
                 AverageRating = m.Ratings.Average(r => r.Score)
+            });
+
+            return Ok(movieDTOList);
+        }
+
+        [Route("top5")]
+        public IHttpActionResult GetTop5Movies()
+        {
+            IQueryable<Movie> movies = db.Movies.Include(m => m.Genres).Include(m => m.Ratings).OrderByDescending(m => m.Ratings.Average(r => r.Score)).Take(5);
+
+            var movieDTOList = movies.Select(m =>
+            new SummarizedMovieDTO
+            {
+                Id = m.Id,
+                Title = m.Title,
+                YearOfRelease = m.YearOfRelease,
+                RunningTime = m.RunningTime,
+                AverageRating = m.Ratings.Average(r => r.Score)
+            });
+
+            return Ok(movieDTOList);
+        }
+
+        [Route("top5/{userName}")]
+        public IHttpActionResult GetTop5MoviesByUserName(string userName)
+        {
+            var userId = db.Users.Include(u => u.Ratings).SingleOrDefault(u => u.UserName == userName).Id;
+
+            var scoredMovies = db.Ratings.Include(r => r.Movie).Where(r => r.UserId == userId).GroupBy(x => x.Movie)
+                .Select(g => new
+                {
+                    Movie = g.Key,
+                    AvgScore = g.Average(x => x.Score)
+                }).OrderByDescending(x => x.AvgScore).Take(5);
+
+            var movieDTOList = scoredMovies.Select(x =>
+            new SummarizedMovieDTO
+            {
+                Id = x.Movie.Id,
+                Title = x.Movie.Title,
+                YearOfRelease = x.Movie.YearOfRelease,
+                RunningTime = x.Movie.RunningTime,
+                AverageRating = x.AvgScore
             });
 
             return Ok(movieDTOList);
