@@ -65,6 +65,9 @@ namespace MoviesAPI.Controllers
         private IQueryable<Movie> GetMovieByFilter(IQueryable<Movie> movies, string filter, string value, out Result result)
         {
             result = Result.NoData;
+            if (movies.Count() == 0)
+                return movies;
+
             if (filter.Equals(FilterCriteria.Title.ToString(), StringComparison.CurrentCultureIgnoreCase))
             {
                 movies = movies.Where(m => m.Title.ToLower().Contains(value.ToLower()));
@@ -172,9 +175,68 @@ namespace MoviesAPI.Controllers
 
             if (result == Result.BadRequest)
                 return BadRequest();
-            else if (movies.Count() == 0)
+
+            if (movies.Count() == 0)
                 return NotFound();
 
+            var movieDTOList = movies.Select(m =>
+            new MovieDTO
+            {
+                Id = m.Id,
+                Title = m.Title,
+                YearOfRelease = m.YearOfRelease,
+                RunningTime = m.RunningTime,
+                AverageRating = m.Ratings.Average(r => r.Score),
+                Genres = m.Genres.Select(g => g.Name).ToList()
+            });
+
+            return Ok(movieDTOList);
+        }
+
+        [Route("{filter1}/{value1}/{filter2}/{value2}/{filter3}/{value3}")]
+        public IHttpActionResult GetMovie(string filter1, string value1, string filter2, string value2, string filter3, string value3)
+        {
+            IQueryable<Movie> movies = null;
+            if (filter1.Equals(FilterCriteria.Title.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            {
+                movies = db.Movies.Include(m => m.Genres).Include(m => m.Ratings).Where(m => m.Title.ToLower().Contains(value1.ToLower()));
+            }
+            else if (filter1.Equals(FilterCriteria.YearOfRelease.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            {
+                int year;
+                if (int.TryParse(value1, out year))
+                {
+                    movies = db.Movies.Include(m => m.Genres).Include(m => m.Ratings).Where(m => m.YearOfRelease == year);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            else if (filter1.Equals(FilterCriteria.Genre.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            {
+                string[] genres = value1.ToLower().Split(',');
+                movies = db.Genres.Include(g => g.Movies).Where(g => genres.Contains(g.Name.ToLower())).SelectMany(g => g.Movies);
+            }
+            else
+            {
+                return BadRequest();
+            }
+
+            Result result;
+            movies = GetMovieByFilter(movies, filter2, value2, out result);
+
+            if (result == Result.BadRequest)
+                return BadRequest();
+
+            movies = GetMovieByFilter(movies, filter3, value3, out result);
+
+            if (result == Result.BadRequest)
+                return BadRequest();
+
+            if (movies.Count() == 0)
+                return NotFound();
+            
             var movieDTOList = movies.Select(m =>
             new MovieDTO
             {
