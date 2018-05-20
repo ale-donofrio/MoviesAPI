@@ -24,5 +24,7 @@ namespace MoviesAPI.Models
         public System.Data.Entity.DbSet<MoviesAPI.Models.User> Users { get; set; }
 
         public System.Data.Entity.DbSet<MoviesAPI.Models.Rating> Ratings { get; set; }
+
+        public System.Data.Entity.DbSet<MoviesAPI.Models.Genre> Genres { get; set; }
     }
 }
