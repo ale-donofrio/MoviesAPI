@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using MoviesAPI.Models;
+using MoviesAPI.Models.DTO;
 
 namespace MoviesAPI.Controllers
 {
@@ -18,22 +19,30 @@ namespace MoviesAPI.Controllers
         private MoviesAPIContext db = new MoviesAPIContext();
 
         // GET: api/Movies
-        public IQueryable<Movie> GetMovies()
+        public IQueryable<MovieDTO> GetMovies()
         {
-            return db.Movies;
+            var movies = from m in db.Movies
+                         select new MovieDTO
+                         {
+                             Id = m.Id,
+                             Title = m.Title,
+                             RunningTime = m.RunningTime,
+                             YearOfRelease = m.YearOfRelease
+                         };
+            return movies;
         }
-
-        // GET: api/Movies/5
-        [ResponseType(typeof(Movie))]
+        
+        [ResponseType(typeof(MovieDTO))]
         public async Task<IHttpActionResult> GetMovie(int id)
         {
-            Movie movie = await db.Movies.FindAsync(id);
+            Movie movie = await db.Movies.Include(m => m.Genres).SingleOrDefaultAsync(m => m.Id == id);
+            
             if (movie == null)
             {
                 return NotFound();
             }
 
-            return Ok(movie);
+            return Ok(new MovieDTO(movie));
         }
 
         // PUT: api/Movies/5

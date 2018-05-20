@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using MoviesAPI.Models;
+using MoviesAPI.Models.DTO;
 
 namespace MoviesAPI.Controllers
 {
@@ -18,9 +19,15 @@ namespace MoviesAPI.Controllers
         private MoviesAPIContext db = new MoviesAPIContext();
 
         // GET: api/Genres
-        public IQueryable<Genre> GetGenres()
+        public IQueryable<GenreDTO> GetGenres()
         {
-            return db.Genres;
+            var genre = from g in db.Genres
+                         select new GenreDTO
+                         {
+                             Id = g.Id,
+                             Name = g.Name
+                         };
+            return genre;
         }
 
         // GET: api/Genres/5
