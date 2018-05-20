@@ -56,7 +56,6 @@ namespace MoviesAPI.Controllers
         }
 
         [Route("{filter}/{value}")]
-        //[ResponseType(typeof(IQueryable<MovieDTO>))]
         public IHttpActionResult GetMovie(string filter, string value)
         {
             IQueryable<Movie> movies = null;
@@ -85,7 +84,7 @@ namespace MoviesAPI.Controllers
             {
                 return BadRequest();
             }
-            
+
             var movieDTOList = movies.Select(m =>
             new MovieDTO
             {
@@ -93,12 +92,13 @@ namespace MoviesAPI.Controllers
                 Title = m.Title,
                 YearOfRelease = m.YearOfRelease,
                 RunningTime = m.RunningTime,
-                AverageRating = m.Ratings.Average(r => r.Score)
+                AverageRating = m.Ratings.Average(r => r.Score),
+                Genres = m.Genres.Select(g => g.Name).ToList()
             });
 
             return Ok(movieDTOList);
         }
-
+        
         // PUT: api/Movies/5
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> PutMovie(int id, Movie movie)
